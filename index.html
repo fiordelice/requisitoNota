@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Requisições de Notas - Firebase</title>
+<title>Requisições de Notas</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; }
@@ -48,16 +48,16 @@ form button:hover { background:#0056b3; }
       <button type="submit">Salvar</button>
     </form>
   </div>
-
   <div class="card">
     <h2>Pendentes</h2>
     <div class="list" id="lista"></div>
+  
   </div>
 
   <div class="card">
-    <h2>Concluídas</h2>
+    <h2>Últimas</h2>
     <div class="list" id="listaConcluidas"></div>
-        <div class="actions">
+      <div class="actions">
       <a href="concluidas.html">Ver histórico completo</a>
     </div>
   </div>
@@ -114,12 +114,19 @@ async function carregarListas(){
 
   const concluidasArray = [];
 
-  snapshot.forEach(docSnap => {
+  for(const docSnap of snapshot.docs){
     const r = docSnap.data();
     const id = docSnap.id;
+
+    // Marcar automaticamente como concluído se a data passou
+    if(!r.concluido && r.conclusao <= hoje){
+      await updateDoc(doc(db, "requisicoes", id), {concluido:true});
+      r.concluido = true; // Atualiza localmente
+    }
+
     const dataFormatada = new Date(r.conclusao).toLocaleDateString("pt-BR");
 
-    if(!r.concluido || r.conclusao >= hoje){
+    if(!r.concluido){
       // Pendentes
       const div = document.createElement("div");
       div.className = "item";
@@ -129,20 +136,19 @@ async function carregarListas(){
         <div class="descricao">${r.descricao || ""}</div>
         <div class="conclusao">Concluir até: ${dataFormatada}</div>
         <div class="actions">
-          ${!r.concluido ? `<button class="concluir" onclick='concluir("${id}")'>Concluir</button>` : ""}
+          <button class="concluir" onclick='concluir("${id}")'>Concluir</button>
           <button class="excluir" onclick='excluir("${id}")'>Excluir</button>
         </div>
       `;
       lista.appendChild(div);
     }
 
-    // Concluídas
     if(r.concluido){
       concluidasArray.push({id, ...r});
     }
-  });
+  }
 
-  // Ordena por data de conclusão e pega as 5 últimas
+  // Últimas 5 concluídas
   concluidasArray.sort((a,b) => new Date(b.conclusao) - new Date(a.conclusao));
   const ultimas5 = concluidasArray.slice(0,5);
   ultimas5.forEach(r => {
@@ -174,7 +180,7 @@ window.excluir = async function(id){
 }
 
 carregarListas();
-setInterval(carregarListas, 60000);
+setInterval(carregarListas, 60000); // Atualiza a cada 1 min
 </script>
 
 </body>
