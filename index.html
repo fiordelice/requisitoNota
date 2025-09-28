@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Requisições de Notas - Firebase</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body, html { margin:0; padding:0; font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #f0f2f5, #c8e6ff); min-height:100vh; }
+  h1,h2 { margin:0 0 10px 0; color:#222; font-weight:700; }
+  .wrap { display:flex; flex-wrap: wrap; justify-content: center; align-items:flex-start; padding:30px; gap:25px; }
+  .card { background:#fff; border-radius:20px; box-shadow:0 8px 20px rgba(0,0,0,0.1); padding:25px; flex:0 1 380px; transition: transform 0.2s, box-shadow 0.2s; }
+  .card:hover { transform: translateY(-6px); box-shadow:0 12px 25px rgba(0,0,0,0.15); }
+  form input, form textarea, form button { width:100%; margin-bottom:15px; padding:12px 10px; border-radius:10px; border:1px solid #ccc; font-size:1em; background:#f9f9f9; }
+  form textarea { min-height:90px; resize:vertical; }
+  form input:focus, form textarea:focus { border-color:#007BFF; outline:none; }
+  form button { background:#007BFF; color:#fff; border:none; cursor:pointer; font-weight:700; transition: background 0.2s; }
+  form button:hover { background:#0056b3; }
+  .list { margin-top:10px; }
+  .item { background:#f0f4ff; padding:12px; margin-bottom:12px; border-radius:10px; display:flex; flex-direction:column; gap:4px; }
+  .numeroPeca { font-weight:700; color:#222; font-size:1.05em; }
+  .solicitante { color:#555; font-size:0.9em; }
+  .descricao { font-size:0.92em; color:#333; white-space:pre-wrap; }
+  .conclusao { font-size:0.88em; color:#555; }
+  .actions { display:flex; gap:10px; margin-top:8px; }
+  .actions button { flex:1; padding:8px; border:none; border-radius:8px; cursor:pointer; font-weight:600; transition: transform 0.1s; }
+  .actions button.concluir { background:#28a745; color:#fff; }
+  .actions button.concluir:hover { transform: translateY(-1px); opacity:0.95; }
+  .actions button.excluir { background:#dc3545; color:#fff; }
+  .actions button.excluir:hover { transform: translateY(-1px); opacity:0.95; }
+  @media(max-width:700px){ .wrap{ flex-direction: column; align-items:center; } .card{ width:100%; max-width:420px; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="card">
+    <h1>Nova Requisição</h1>
+    <form id="reqForm">
+      <input type="text" id="numero" placeholder="Número da Nota" required>
+      <input type="text" id="peca" placeholder="Nome da Peça" required>
+      <input type="text" id="solicitante" placeholder="Solicitante" required>
+      <textarea id="descricao" placeholder="Descrição / Observações"></textarea>
+      <label>Data de Conclusão:</label>
+      <input type="date" id="conclusao" required>
+      <button type="submit">Salvar</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Pendentes</h2>
+    <div class="list" id="lista"></div>
+  </div>
+
+  <div class="card">
+    <h2>Concluídas</h2>
+    <div class="list" id="listaConcluidas"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// Config Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAgnptSu09DJlZYVHKSCwPhZLEVwFSQduw",
+  authDomain: "requisitonotas.firebaseapp.com",
+  projectId: "requisitonotas",
+  storageBucket: "requisitonotas.firebasestorage.app",
+  messagingSenderId: "64291138957",
+  appId: "1:64291138957:web:3494c68e85273f4ba361c4",
+  measurementId: "G-G9567BLMH7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const form = document.getElementById("reqForm");
+const lista = document.getElementById("lista");
+const listaConcluidas = document.getElementById("listaConcluidas");
+
+// Salvar nova requisição
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = {
+    numero: document.getElementById("numero").value,
+    peca: document.getElementById("peca").value,
+    solicitante: document.getElementById("solicitante").value,
+    descricao: document.getElementById("descricao").value,
+    conclusao: document.getElementById("conclusao").value,
+    criado_em: new Date().toLocaleString(),
+    concluido: false
+  };
+  await addDoc(collection(db, "requisicoes"), data);
+  alert("✅ Requisição cadastrada!");
+  form.reset();
+  carregarListas();
+});
+
+// Carregar listas
+async function carregarListas(){
+  lista.innerHTML = "";
+  listaConcluidas.innerHTML = "";
+
+  const q = query(collection(db, "requisicoes"), orderBy("conclusao"));
+  const snapshot = await getDocs(q);
+  const hoje = new Date().toISOString().split("T")[0];
+
+  snapshot.forEach(docSnap => {
+    const r = docSnap.data();
+    const id = docSnap.id;
+    const dataFormatada = new Date(r.conclusao).toLocaleDateString("pt-BR");
+
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <div class="numeroPeca">${r.numero} - ${r.peca}</div>
+      <div class="solicitante">${r.solicitante} | ${r.criado_em}</div>
+      <div class="descricao">${r.descricao || ""}</div>
+      <div class="conclusao">${r.concluido ? "Concluído em: "+dataFormatada : "Concluir até: "+dataFormatada}</div>
+      <div class="actions">
+        ${!r.concluido ? `<button class="concluir" onclick='concluir("${id}")'>Concluir</button>` : ""}
+        <button class="excluir" onclick='excluir("${id}")'>Excluir</button>
+      </div>
+    `;
+
+    if(r.concluido || r.conclusao <= hoje){
+      listaConcluidas.appendChild(div);
+    } else {
+      lista.appendChild(div);
+    }
+  });
+}
+
+// Funções globais
+window.concluir = async function(id){
+  await updateDoc(doc(db, "requisicoes", id), {concluido:true});
+  carregarListas();
+}
+
+window.excluir = async function(id){
+  await deleteDoc(doc(db, "requisicoes", id));
+  carregarListas();
+}
+
+carregarListas();
+setInterval(carregarListas, 60000);
+</script>
+
+</body>
+</html>
