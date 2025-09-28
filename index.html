@@ -114,20 +114,30 @@ async function carregarListas(){
 
     const div = document.createElement("div");
     div.className = "item";
-    div.innerHTML = `
-      <div class="numeroPeca">${r.numero} - ${r.peca}</div>
-      <div class="solicitante">${r.solicitante} | ${r.criado_em}</div>
-      <div class="descricao">${r.descricao || ""}</div>
-      <div class="conclusao">${r.concluido ? "Concluído em: "+dataFormatada : "Concluir até: "+dataFormatada}</div>
-      <div class="actions">
-        ${!r.concluido ? `<button class="concluir" onclick='concluir("${id}")'>Concluir</button>` : ""}
-        <button class="excluir" onclick='excluir("${id}")'>Excluir</button>
-      </div>
-    `;
-
+    
+    // Se concluído, não mostra botão Concluir
     if(r.concluido || r.conclusao <= hoje){
+      div.innerHTML = `
+        <div class="numeroPeca">${r.numero} - ${r.peca}</div>
+        <div class="solicitante">${r.solicitante} | ${r.criado_em}</div>
+        <div class="descricao">${r.descricao || ""}</div>
+        <div class="conclusao">Concluído em: ${dataFormatada}</div>
+        <div class="actions">
+          <button class="excluir" onclick='excluir("${id}")'>Excluir</button>
+        </div>
+      `;
       listaConcluidas.appendChild(div);
     } else {
+      div.innerHTML = `
+        <div class="numeroPeca">${r.numero} - ${r.peca}</div>
+        <div class="solicitante">${r.solicitante} | ${r.criado_em}</div>
+        <div class="descricao">${r.descricao || ""}</div>
+        <div class="conclusao">Concluir até: ${dataFormatada}</div>
+        <div class="actions">
+          <button class="concluir" onclick='concluir("${id}")'>Concluir</button>
+          <button class="excluir" onclick='excluir("${id}")'>Excluir</button>
+        </div>
+      `;
       lista.appendChild(div);
     }
   });
