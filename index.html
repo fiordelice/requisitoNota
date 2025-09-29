@@ -7,41 +7,40 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body, html {
-      margin:0;
-      padding:0;
+      margin: 0;
+      padding: 0;
       font-family: 'Roboto', sans-serif;
       background: #ffffff;
-      min-height:100vh;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    h1,h2 {
-      margin:0 0 10px 0;
-      color:#222;
-      font-weight:700;
+    h1, h2 {
+      margin: 0 0 10px 0;
+      color: #222;
+      font-weight: 700;
     }
     .wrap {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
       align-items: flex-start;
-      padding: 30px;
       gap: 25px;
-      max-width: 1200px; /* Limita a largura total dos cards */
-      width: 100%;
+      max-width: 1200px; /* Limita a largura dos cards */
+      padding: 30px;
     }
     .card {
       background: #fff;
       border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
       padding: 25px;
-      flex: 0 1 380px;
+      flex: 1 1 380px; /* Ajusta para que os cards possam se adaptar no layout */
       transition: transform 0.2s, box-shadow 0.2s;
+      min-width: 380px; /* Garante que os cards tenham pelo menos 380px */
     }
     .card:hover {
       transform: translateY(-6px);
-      box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
     }
     form input, form textarea, form button {
       width: 100%;
@@ -242,8 +241,6 @@ async function carregarListas(){
         <div class="solicitante">${r.solicitante} | ${r.criado_em}</div>
         <div class="descricao">${r.descricao || ""}</div>
         <div class="conclusao">Concluir até: ${dataFormatada}</div>
-        <div class="actions">
-          <button class="concluir" onclick='concluir("${id}")'>Concluir</
         <div class="actions">
           <button class="concluir" onclick='concluir("${id}")'>Concluir</button>
           <button class="excluir" onclick='excluir("${id}")'>Excluir</button>
