@@ -86,6 +86,33 @@
         padding: 20px;
       }
     }
+    .action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.action-buttons button {
+  flex: 1;
+}
+
+.action-buttons .cancelar {
+  flex: 1;
+  background-color: #6c757d;
+  color: #fff;
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.action-buttons .cancelar:hover {
+  background-color: #5a6268;
+}
+
   </style>
 </head>
 <body>
@@ -100,6 +127,7 @@
       <textarea id="descricao" placeholder="Descrição / Observações"></textarea>
       <label>Data de Conclusão:</label>
       <input type="date" id="conclusao" required>
+      <a href="index.html" class="back-link">← Voltar</a>
       <button type="submit">Salvar Alterações</button>
     </form>
     <a href="index.html" class="back-link">← Voltar</a>
