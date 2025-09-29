@@ -30,20 +30,29 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.1);
       transition: all 0.2s ease-in-out;
     }
-    h1 {
+    .card h1 {
       margin-bottom: 20px;
       color: #222;
       font-weight: 700;
       font-size: 1.8em;
       text-align: center;
+      position: relative;
     }
-    h1 a {
+    .voltar-seta {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.5em;
       color: #007BFF;
       text-decoration: none;
+      font-weight: bold;
+      padding: 4px 12px;
     }
-    h1 a:hover {
+    .voltar-seta:hover {
       text-decoration: underline;
     }
+
     form input, form textarea, form button {
       width: 100%;
       margin-bottom: 15px;
@@ -63,7 +72,7 @@
       min-height: 90px;
     }
     button {
-      background-color: #28a745;  /* Cor verde */
+      background-color: #28a745;
       color: white;
       font-weight: 600;
       border: none;
@@ -71,8 +80,9 @@
       transition: background-color 0.2s ease;
     }
     button:hover {
-      background-color: #218838;  /* Tom mais escuro de verde */
+      background-color: #218838;
     }
+
     .back-link {
       display: block;
       text-align: center;
@@ -84,6 +94,7 @@
     .back-link:hover {
       text-decoration: underline;
     }
+
     @media (max-width: 600px) {
       .wrap {
         padding: 20px;
@@ -92,114 +103,95 @@
         padding: 20px;
       }
     }
-    .action-buttons {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .action-buttons button {
-      flex: 1;
-    }
-    .action-buttons .cancelar {
-      flex: 1;
-      background-color: #0056b3;
-      color: #fff;
-      padding: 12px;
-      text-align: center;
-      border-radius: 10px;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-block;
-      transition: background-color 0.2s;
-    }
-    .action-buttons .cancelar:hover {
-      background-color: #5a6268;
-    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1><a href="index.html">Editar Requisição</a></h1>
-      <form id="editForm">
-        <input type="text" id="numero" placeholder="Número da Nota" required>
-        <input type="text" id="peca" placeholder="Nome da Peça" required>
-        <input type="text" id="solicitante" placeholder="Solicitante" required>
-        <textarea id="descricao" placeholder="Descrição / Observações"></textarea>
-        <label>Data de Conclusão:</label>
-        <input type="date" id="conclusao" required>
-        <button type="submit">Salvar Alterações</button>
-      </form>
-      <a href="index.html" class="back-link">← Voltar</a>
-    </div>
+
+<div class="wrap">
+  <div class="card">
+    <h1>
+      <a href="index.html" class="voltar-seta">&larr;</a>
+      Editar Requisição
+    </h1>
+    <form id="editForm">
+      <input type="text" id="numero" placeholder="Número da Nota" required>
+      <input type="text" id="peca" placeholder="Nome da Peça" required>
+      <input type="text" id="solicitante" placeholder="Solicitante" required>
+      <textarea id="descricao" placeholder="Descrição / Observações"></textarea>
+      <label>Data de Conclusão:</label>
+      <input type="date" id="conclusao" required>
+      <button type="submit">Salvar Alterações</button>
+    </form>
   </div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAgnptSu09DJlZYVHKSCwPhZLEVwFSQduw",
-      authDomain: "requisitonotas.firebaseapp.com",
-      projectId: "requisitonotas",
-      storageBucket: "requisitonotas.firebasestorage.app",
-      messagingSenderId: "64291138957",
-      appId: "1:64291138957:web:3494c68e85273f4ba361c4",
-      measurementId: "G-G9567BLMH7"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyAgnptSu09DJlZYVHKSCwPhZLEVwFSQduw",
+    authDomain: "requisitonotas.firebaseapp.com",
+    projectId: "requisitonotas",
+    storageBucket: "requisitonotas.firebasestorage.app",
+    messagingSenderId: "64291138957",
+    appId: "1:64291138957:web:3494c68e85273f4ba361c4",
+    measurementId: "G-G9567BLMH7"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get("id");
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get("id");
 
-    const numero = document.getElementById("numero");
-    const peca = document.getElementById("peca");
-    const solicitante = document.getElementById("solicitante");
-    const descricao = document.getElementById("descricao");
-    const conclusao = document.getElementById("conclusao");
+  const numero = document.getElementById("numero");
+  const peca = document.getElementById("peca");
+  const solicitante = document.getElementById("solicitante");
+  const descricao = document.getElementById("descricao");
+  const conclusao = document.getElementById("conclusao");
 
-    async function carregarDados() {
-      if (!id) {
-        alert("ID não informado.");
-        window.location.href = "index.html";
-        return;
-      }
-
-      const docRef = doc(db, "requisicoes", id);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        numero.value = data.numero;
-        peca.value = data.peca;
-        solicitante.value = data.solicitante;
-        descricao.value = data.descricao;
-        conclusao.value = data.conclusao;
-      } else {
-        alert("Requisição não encontrada.");
-        window.location.href = "index.html";
-      }
+  async function carregarDados() {
+    if (!id) {
+      alert("ID não informado.");
+      window.location.href = "index.html";
+      return;
     }
 
-    document.getElementById("editForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    const docRef = doc(db, "requisicoes", id);
+    const docSnap = await getDoc(docRef);
 
-      const docRef = doc(db, "requisicoes", id);
-      await updateDoc(docRef, {
-        numero: numero.value,
-        peca: peca.value,
-        solicitante: solicitante.value,
-        descricao: descricao.value,
-        conclusao: conclusao.value
-      });
-
-      alert("✅ Alterações salvas!");
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      numero.value = data.numero;
+      peca.value = data.peca;
+      solicitante.value = data.solicitante;
+      descricao.value = data.descricao;
+      conclusao.value = data.conclusao;
+    } else {
+      alert("Requisição não encontrada.");
       window.location.href = "index.html";
+    }
+  }
+
+  document.getElementById("editForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const docRef = doc(db, "requisicoes", id);
+    await updateDoc(docRef, {
+      numero: numero.value,
+      peca: peca.value,
+      solicitante: solicitante.value,
+      descricao: descricao.value,
+      conclusao: conclusao.value
     });
 
-    carregarDados();
-  </script>
+    alert("✅ Alterações salvas!");
+    window.location.href = "index.html";
+  });
+
+  carregarDados();
+</script>
+
 </body>
 </html>
