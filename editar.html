@@ -57,32 +57,7 @@
       resize: vertical;
       min-height: 90px;
     }
-    button {
-      background:#007BFF;
-      color:white;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 600;
-      text-decoration: none;
-      text-align: center;
-      display: inline-block;
-      transition: background-color 0.2s ease;
-    }
-    button:hover {
-      background:#0056b3;
-    }
-
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 10px;
-      color: #007BFF;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .back-link:hover {
-      text-decoration: underline;
-    }
+   
 
     @media (max-width: 600px) {
       .wrap {
@@ -92,9 +67,9 @@
         padding: 20px;
       }
     }
-    .actions a {
-      background:#007BFF;
-      color:white;
+ button, .actions a {
+      background: #007BFF;
+      color: white;
       padding: 12px;
       border-radius: 10px;
       font-weight: 600;
@@ -103,8 +78,32 @@
       display: inline-block;
       transition: background-color 0.2s ease;
     }
+
+    button:hover, .actions a:hover {
+      background: #0056b3;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Botão Voltar */
+    .actions a {
+      background: #009CFF;
+    }
+
     .actions a:hover {
-      background:#0056b3;
+      background: #0082cc;
+    }
+
+    /* Botão Salvar */
+    form button {
+      background: #28a745; /* Verde para Salvar */
+      color: white;
+    }
+    form button:hover {
+      background: #218838; /* Verde escuro para Salvar */
     }
 
   </style>
