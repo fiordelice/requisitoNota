@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <title>Requisições de Notas</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script> <!-- Importando o SheetJS -->
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
+      *, *::before, *::after { box-sizing: border-box; }
     body, html {
       margin: 0;
       padding: 0;
@@ -128,6 +129,18 @@
     .actions a:hover {
       background: #0056b3;
     }
+    .actions-execel {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.1s;
+      text-decoration: none;
+      display: inline-block;
+    }
+   
 
     @media(max-width: 700px) {
       .wrap {
@@ -160,6 +173,11 @@
   <div class="card">
     <h1>Pendentes</h1>
     <div class="list" id="lista"></div>
+    <div class="actions-execel">
+    <button id="exportButton">Exportar para Excel</button>
+  </div>
+</div>
+
   </div>
 
   <div class="card">
@@ -169,8 +187,9 @@
       <a href="concluidas.html">Ver histórico completo</a>
     </div>
   </div>
-</div>
 
+  <!-- Botão para exportar para Excel -->
+  
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
@@ -286,8 +305,31 @@ window.excluir = async function(id){
 
 carregarListas();
 setInterval(carregarListas, 60000);
+
+// Função para exportar as requisições para um arquivo Excel
+document.getElementById('exportButton').addEventListener('click', async function() {
+  const snapshot = await getDocs(collection(db, "requisicoes"));
+  const data = snapshot.docs.map(docSnap => docSnap.data());
+  
+  // Formatar os dados para o Excel
+  const exportData = data.map(item => ({
+    'Número da Nota': item.numero,
+    'Nome da Peça': item.peca,
+    'Solicitante': item.solicitante,
+    'Descrição / Observações': item.descricao || '',
+    'Data de Conclusão': new Date(item.conclusao).toLocaleDateString('pt-BR'),
+    'Status': item.concluido ? 'Concluída' : 'Pendente',
+  }));
+
+  // Criar a planilha
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Requisições");
+
+  // Gerar o arquivo Excel
+  XLSX.writeFile(wb, 'Requisicoes_Notas.xlsx');
+});
 </script>
 
 </body>
 </html>
-
