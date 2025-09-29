@@ -5,20 +5,93 @@
   <title>Editar Requisição</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body, html { margin:0; padding:0; font-family: 'Roboto', sans-serif; background:#ffffff; min-height:100vh; }
-    .wrap { max-width:600px; margin:40px auto; padding:20px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); border-radius:12px; }
-    h1 { font-weight:700; color:#222; margin-bottom:20px; }
-    form input, form textarea, form button {
-      width:100%; padding:12px; margin-bottom:15px;
-      border-radius:8px; border:1px solid #ccc; font-size:1em;
+    *, *::before, *::after {
+      box-sizing: border-box;
     }
-    form textarea { min-height:80px; resize:vertical; }
-    button { background:#007BFF; color:#fff; border:none; font-weight:600; cursor:pointer; transition: background 0.2s; }
-    button:hover { background:#0056b3; }
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+    }
+    .wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      transition: all 0.2s ease-in-out;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #222;
+      font-weight: 700;
+      font-size: 1.8em;
+      text-align: center;
+    }
+    form input, form textarea, form button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      background: #f9f9f9;
+      transition: border-color 0.2s ease;
+    }
+    form input:focus, form textarea:focus {
+      border-color: #007BFF;
+      outline: none;
+    }
+    form textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 10px;
+      color: #007BFF;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .wrap {
+        padding: 20px;
+      }
+      .card {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
+
+<div class="wrap">
+  <div class="card">
     <h1>Editar Requisição</h1>
     <form id="editForm">
       <input type="text" id="numero" placeholder="Número da Nota" required>
@@ -29,60 +102,81 @@
       <input type="date" id="conclusao" required>
       <button type="submit">Salvar Alterações</button>
     </form>
+    <a href="index.html" class="back-link">← Voltar</a>
   </div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, updateDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAgnptSu09DJlZYVHKSCwPhZLEVwFSQduw",
-      authDomain: "requisitonotas.firebaseapp.com",
-      projectId: "requisitonotas",
-      storageBucket: "requisitonotas.firebasestorage.app",
-      messagingSenderId: "64291138957",
-      appId: "1:64291138957:web:3494c68e85273f4ba361c4",
-      measurementId: "G-G9567BLMH7"
-    };
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAgnptSu09DJlZYVHKSCwPhZLEVwFSQduw",
+  authDomain: "requisitonotas.firebaseapp.com",
+  projectId: "requisitonotas",
+  storageBucket: "requisitonotas.firebasestorage.app",
+  messagingSenderId: "64291138957",
+  appId: "1:64291138957:web:3494c68e85273f4ba361c4",
+  measurementId: "G-G9567BLMH7"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get("id");
-    const form = document.getElementById("editForm");
+// Obter ID da URL
+const urlParams = new URLSearchParams(window.location.search);
+const id = urlParams.get("id");
 
-    async function carregarDados() {
-      if (!id) return alert("ID inválido.");
-      const docRef = doc(db, "requisicoes", id);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        document.getElementById("numero").value = data.numero;
-        document.getElementById("peca").value = data.peca;
-        document.getElementById("solicitante").value = data.solicitante;
-        document.getElementById("descricao").value = data.descricao || "";
-        document.getElementById("conclusao").value = data.conclusao;
-      } else {
-        alert("Requisição não encontrada.");
-      }
-    }
+const numero = document.getElementById("numero");
+const peca = document.getElementById("peca");
+const solicitante = document.getElementById("solicitante");
+const descricao = document.getElementById("descricao");
+const conclusao = document.getElementById("conclusao");
 
-    form.addEventListener("submit", async e => {
-      e.preventDefault();
-      const docRef = doc(db, "requisicoes", id);
-      await updateDoc(docRef, {
-        numero: document.getElementById("numero").value,
-        peca: document.getElementById("peca").value,
-        solicitante: document.getElementById("solicitante").value,
-        descricao: document.getElementById("descricao").value,
-        conclusao: document.getElementById("conclusao").value
-      });
-      alert("✅ Requisição atualizada!");
-      window.location.href = "index.html";
-    });
+async function carregarDados(){
+  if(!id) {
+    alert("ID não informado.");
+    window.location.href = "index.html";
+    return;
+  }
 
-    carregarDados();
-  </script>
+  const docRef = doc(db, "requisicoes", id);
+  const docSnap = await getDoc(docRef);
+
+  if(docSnap.exists()){
+    const data = docSnap.data();
+    numero.value = data.numero;
+    peca.value = data.peca;
+    solicitante.value = data.solicitante;
+    descricao.value = data.descricao;
+    conclusao.value = data.conclusao;
+  } else {
+    alert("Requisição não encontrada.");
+    window.location.href = "index.html";
+  }
+}
+
+document.getElementById("editForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const docRef = doc(db, "requisicoes", id);
+  await updateDoc(docRef, {
+    numero: numero.value,
+    peca: peca.value,
+    solicitante: solicitante.value,
+    descricao: descricao.value,
+    conclusao: conclusao.value
+  });
+
+  alert("✅ Alterações salvas!");
+  window.location.href = "index.html";
+});
+
+carregarDados();
+</script>
+
 </body>
 </html>
