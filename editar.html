@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Requisição</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body, html { margin:0; padding:0; font-family: 'Roboto', sans-serif; background:#ffffff; min-height:100vh; }
+    .wrap { max-width:600px; margin:40px auto; padding:20px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); border-radius:12px; }
+    h1 { font-weight:700; color:#222; margin-bottom:20px; }
+    form input, form textarea, form button {
+      width:100%; padding:12px; margin-bottom:15px;
+      border-radius:8px; border:1px solid #ccc; font-size:1em;
+    }
+    form textarea { min-height:80px; resize:vertical; }
+    button { background:#007BFF; color:#fff; border:none; font-weight:600; cursor:pointer; transition: background 0.2s; }
+    button:hover { background:#0056b3; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Editar Requisição</h1>
+    <form id="editForm">
+      <input type="text" id="numero" placeholder="Número da Nota" required>
+      <input type="text" id="peca" placeholder="Nome da Peça" required>
+      <input type="text" id="solicitante" placeholder="Solicitante" required>
+      <textarea id="descricao" placeholder="Descrição / Observações"></textarea>
+      <label>Data de Conclusão:</label>
+      <input type="date" id="conclusao" required>
+      <button type="submit">Salvar Alterações</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgnptSu09DJlZYVHKSCwPhZLEVwFSQduw",
+      authDomain: "requisitonotas.firebaseapp.com",
+      projectId: "requisitonotas",
+      storageBucket: "requisitonotas.firebasestorage.app",
+      messagingSenderId: "64291138957",
+      appId: "1:64291138957:web:3494c68e85273f4ba361c4",
+      measurementId: "G-G9567BLMH7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+    const form = document.getElementById("editForm");
+
+    async function carregarDados() {
+      if (!id) return alert("ID inválido.");
+      const docRef = doc(db, "requisicoes", id);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        document.getElementById("numero").value = data.numero;
+        document.getElementById("peca").value = data.peca;
+        document.getElementById("solicitante").value = data.solicitante;
+        document.getElementById("descricao").value = data.descricao || "";
+        document.getElementById("conclusao").value = data.conclusao;
+      } else {
+        alert("Requisição não encontrada.");
+      }
+    }
+
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      const docRef = doc(db, "requisicoes", id);
+      await updateDoc(docRef, {
+        numero: document.getElementById("numero").value,
+        peca: document.getElementById("peca").value,
+        solicitante: document.getElementById("solicitante").value,
+        descricao: document.getElementById("descricao").value,
+        conclusao: document.getElementById("conclusao").value
+      });
+      alert("✅ Requisição atualizada!");
+      window.location.href = "index.html";
+    });
+
+    carregarDados();
+  </script>
+</body>
+</html>
